@@ -57,10 +57,12 @@ class FileView extends hide.ui.View<{ path : String }> {
 			return true;
 
 		// We want to check if the file still exist (it could still exists but not with the same case !)
-		var absPath = Ide.inst.getPath(state.path);
-		var baseDir = new haxe.io.Path(absPath).dir;
+		// Use fs.baseDir to construct the absolute path, ensuring it always matches
+		// what checkPath() expects internally (which uses baseDir for path splitting).
+		@:privateAccess var absPath = fs.baseDir + (state.path.charAt(0) == "/" ? state.path.substr(1) : state.path);
+		@:privateAccess var baseDir = new haxe.io.Path(absPath).dir;
 
-		fs.removePathFromCache(Ide.inst.getPath(absPath));
+		fs.removePathFromCache(state.path);
 		@:privateAccess fs.directoryCache.remove(baseDir);
 
 		@:privateAccess return fs.checkPath(absPath);
