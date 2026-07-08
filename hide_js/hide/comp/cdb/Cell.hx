@@ -133,6 +133,8 @@ class Cell {
 	}
 
 	function showMenu() {
+		if( inEdit )
+			return false;
 		var menu : Array<hide.comp.ContextMenu.MenuItem> = null;
 		switch( editColumn.type ) {
 		case TId:
@@ -231,6 +233,8 @@ class Cell {
 				checked : pe != null && pe.col == pc,
 				click : () -> setVariant(pc),
 			}];
+			variants.push({ label : "", isSeparator : true });
+			variants.push({ label : "New type...", click : () -> editor.newColumn(ps, null, (c) -> setVariant(c)) });
 			if( menu == null ) menu = [];
 			if( menu.length > 0 ) menu.push({ label : "", isSeparator : true });
 			menu.push({ label : "Type", menu : variants });
