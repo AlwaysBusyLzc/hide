@@ -386,7 +386,7 @@ class HuiMenuItem extends HuiElement {
 
 		if (item.icon != null) {
 			icon.huiBg.setTexture(item.icon.toTexture());
-			icon.huiBg.imageIsSdf = item.icon is hrt.ui.Sdf;
+			icon.huiBg.imageIsSdf = StringTools.endsWith(item.icon.entry.name, "sdf.png");
 			icon.huiBg.imageMode = Fit;
 		}
 
@@ -412,9 +412,9 @@ class HuiMenuItem extends HuiElement {
 
 	function updateCheck() {
 		if (item.checked != null) {
-			icon.huiBg.image = {path: item.checked ? "ui/icons/check.png" : "ui/icons/checkBlank.png", mode: Fit};
+			icon.huiBg.image = {path: item.checked ? "ui/icons/check.png" : "ui/icons/check_blank.png", mode: Fit};
 		} else if (item.radio != null) {
-			icon.huiBg.image = {path: item.radio() ? "ui/icons/radio.png" : "ui/icons/radioBlank.png", mode: Fit};
+			icon.huiBg.image = {path: item.radio() ? "ui/icons/radio.png" : "ui/icons/radio_blank.png", mode: Fit};
 		}
 	}
 
