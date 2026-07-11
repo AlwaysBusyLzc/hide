@@ -238,16 +238,16 @@ class Interactive2 extends h2d.Interactive {
 
 		if (!e.propagate)
 			return;
-		var scale = huiScene.getScene().viewportScaleX;
 
 		var newEvent = e;
 
+		var scene = huiScene.getScene();
 		if (fixPos) {
 			var clone = new hxd.Event(e.kind, e.relX, e.relY);
 
 			// replace global events in screenSpace
-			clone.relX += huiScene.absX * scale;
-			clone.relY += huiScene.absY * scale;
+			clone.relX = scene.mouseX * scene.viewportScaleX;
+			clone.relY = scene.mouseY * scene.viewportScaleY;
 
 			clone.relZ = e.relZ;
 			clone.propagate = e.propagate;
@@ -262,8 +262,12 @@ class Interactive2 extends h2d.Interactive {
 
 		if (newEvent.kind == EPush) {
 			capturing = true;
+			var captureButton = e.button;
+
 			@:privateAccess getScene().events.startCapture((e) -> {
 					handleEvent2(e, false);
+					if (!hxd.Key.isDown(captureButton))
+						@:privateAccess getScene().events.stopCapture();
 				}, () -> {
 				capturing = false;
 			});

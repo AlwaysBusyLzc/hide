@@ -78,7 +78,7 @@ class HuiHistogramRange extends HuiElement {
 			<hui-icon("diamond") class="handle" id="handle-range-end"/>
 		</hui-element>
 		<hui-input-box id="input-range-end" class="group"/>
-		<hui-button class="group"><hui-icon("back_arrow")/></hui-button>
+		<hui-button class="group" id="reset-range"><hui-icon("back_arrow")/></hui-button>
 		<hui-button class="group"><hui-icon("histogram")/></hui-button>
 		<hui-toggle class="group-end" id="linear-tog"><hui-icon("gamma")/></hui-toggle>
 	</hui-histogram-range>
@@ -163,6 +163,16 @@ class HuiHistogramRange extends HuiElement {
 			e.propagate = false;
 		}
 
+		resetRange.onClick = (_) -> {
+			curMin = 0.;
+			curMax = 1.;
+			@:privateAccess view.shader.rangeMin = curMin;
+			@:privateAccess view.shader.rangeMax = curMax;
+			inputRangeStart.text = '${curMin}';
+			inputRangeEnd.text = '${curMax}';
+			refresh();
+		}
+
 		range.onAfterReflow = refresh;
 	}
 }
@@ -176,8 +186,6 @@ class Texture extends HuiView<{path: String}> {
 			</hui-element>
 			<hui-element id="details">
 				<hui-category("Compression")>
-					<hui-element class="horizontal"><hui-text("Compressed texture weight") class="label"/><hui-text("1 MB") class="value" id="weight-compressed-el"/></hui-element>
-					<hui-element class="horizontal"><hui-text("Uncompressed texture weight") class="label"/><hui-text("10 MB") class="value" id="weight-uncompressed-el"/></hui-element>
 					<hui-element class="horizontal"><hui-text("Format") class="label"/><hui-select class="value" id="format-sel"/></hui-element>
 					<hui-element class="horizontal" id="alpha-line"><hui-text("Alpha") class="label"/><hui-checkbox id="use-alpha"/><hui-input-box class="value" id="alpha-input"/></hui-element>
 					<hui-element class="horizontal" id="mips-line"><hui-text("Mip Maps") class="label"/><hui-checkbox id="mips"/></hui-element>
@@ -185,6 +193,10 @@ class Texture extends HuiView<{path: String}> {
 					<hui-element class="horizontal"><hui-text("Filter") class="label"/><hui-select id="filter-sel" class="value"/></hui-element>
 					<hui-button class="full" id="reset-soft-btn"><hui-text("Reset Preview")/></hui-button>
 					<hui-button class="full" id="reset-full-btn"><hui-text("Reset Compression")/></hui-button>
+					<hui-element class="vertical" id="compression-infos">
+						<hui-element class="horizontal"><hui-text("Uncompressed texture weight") class="label"/><hui-text("10 MB") class="value" id="weight-uncompressed-el"/></hui-element>
+						<hui-element class="horizontal"><hui-text("Compressed texture weight") class="label"/><hui-text("1 MB") class="value" id="weight-compressed-el"/></hui-element>
+					</hui-element>
 				</hui-category>
 			</hui-element>
 		</hui-split-container>
@@ -242,7 +254,7 @@ class Texture extends HuiView<{path: String}> {
 		}
 
 		viewer.onWheel = (e : hxd.Event) -> {
-			var amount = e.wheelDelta * -0.1;
+			var amount = e.wheelDelta * -0.01;
 			var newZoom = hxd.Math.max(zoom + amount, MIN_ZOOM);
 
 			var absX = (e.relX - pan.x) / zoom;
@@ -256,7 +268,7 @@ class Texture extends HuiView<{path: String}> {
 		}
 
 		viewer.onPush = (e : hxd.Event) -> {
-			if (e.button == 2 || onDrag != null)
+			if (onDrag != null)
 				return;
 
 			if (e.button == 1 && sliderBmp.visible) {
@@ -266,7 +278,7 @@ class Texture extends HuiView<{path: String}> {
 					refresh();
 				}
 			}
-			else if (e.button == 0) {
+			else if (e.button == 0 || e.button == 2) {
 				var originDrag = new h2d.col.Point(e.relX, e.relY);
 				var originPan = pan.clone();
 				onDrag = (e) -> {
@@ -379,7 +391,7 @@ class Texture extends HuiView<{path: String}> {
 	}
 
 	override function getToolbarWidgets() : Array<HuiElement> {
-		var widgets : Array<HuiElement> = [];
+		var widgets : Array<HuiElement> = super.getToolbarWidgets();
 
 		var helpBtn = new HuiButton();
 		helpBtn.onClick = (_) -> {
